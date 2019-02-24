@@ -18,8 +18,8 @@ class kova_mnist_tools():
 
 
     def __init__(self,
-                 batch_file_mask = 'files/temp/example_{}.csv',
-                 target_file_mask = 'example{}.csv',
+                 batch_file_mask = 'example_b_{}.csv',
+                 target_file_mask = 'example_{}.csv',
                  train_file='train.csv',
                  path_to_files = ''
                  ):
