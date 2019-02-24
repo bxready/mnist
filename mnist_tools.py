@@ -217,7 +217,7 @@ class kova_mnist_tools():
         print("Loading kagle dataset data ...   ")
         data_set = self.load_train_dataset('files/train.csv')
         print("Loading kagle dataset data succesfull")
-        tmp_file = 'files/temp/example_{}.csv'
+        tmp_file = self.batch_file_mask
         for i in range(1, batch_counts + 1):
             batch_data = self.load_train_dataset(tmp_file.format(i))
             data_set = np.append(data_set, batch_data, axis=0)
