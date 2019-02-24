@@ -29,7 +29,7 @@ class kova_mnist_tools():
         self.train_file = path_to_files + train_file
 
 
-    def load_train_dataset(self):
+    def load_train_dataset(self, batch_mode = False, batch_count=0):
         """
         function load dataset from kaggle train data csv
         example:
@@ -38,9 +38,10 @@ class kova_mnist_tools():
         -------------------------------------------------
         """
         train_dataset = np.array([]);
-        if os.path.isfile(self.train_file):
-            train_dataset = np.loadtxt(self.train_file, skiprows=1, delimiter=',')
-            print(self.train_file)
+        file_name = self.train_file if not batch_mode else self.batch_file_mask.format(batch_count)
+        if os.path.isfile(file_name):
+            train_dataset = np.loadtxt(file_name, skiprows=1, delimiter=',')
+            print(file_name)
         return train_dataset
 
 
@@ -83,7 +84,7 @@ class kova_mnist_tools():
         """
         if multiple > 0:
             for i in train_image:
-                self.show_dataset_images(train_image[i], train_value)
+                self.show_dataset_images(i, train_value)
         else:
             plt.imshow(Image.fromarray(train_image.reshape(28, 28)))
             plt.show()
@@ -135,9 +136,9 @@ class kova_mnist_tools():
 
         gen_images = train_image
         new_images = self.norm(new_images, True);
+        gen_images = np.append(gen_images, new_images, axis=0)
 
         for i in new_images:
-            gen_images = np.append(gen_images, train_image, axis=0)
             if show_result:
                 self.show_dataset_images(i, train_value)
 
@@ -197,6 +198,7 @@ class kova_mnist_tools():
                 k, operation_len, batch_count,  round(operation_len / batch_size)), end="")
 
             new_images = self.generate_images(children_image_count, i, show_result=False, return_original=False)
+
             #data_set = np.append(data_set, new_images, axis=0)
             batch_data_set = np.append(batch_data_set, new_images, axis=0)
             batch_elements += 1
@@ -213,13 +215,13 @@ class kova_mnist_tools():
             self.save_data(tmp_file.format(batch_count), batch_data_set)
 
 
-    def create_dataset_from_batches(self, batch_counts):
+    def create_dataset_from_batches(self, batch_counts, postfix=''):
         print("Loading kagle dataset data ...   ")
-        data_set = self.load_train_dataset('files/train.csv')
+        data_set = self.load_train_dataset()
         print("Loading kagle dataset data succesfull")
         tmp_file = self.batch_file_mask
         for i in range(1, batch_counts + 1):
-            batch_data = self.load_train_dataset(tmp_file.format(i))
+            batch_data = self.load_train_dataset(True, i)
             data_set = np.append(data_set, batch_data, axis=0)
             print("Prepare {} of {} batches ...   Rows in dataset: {}".format(i, batch_counts, len(data_set)))
         print("End prepare")
@@ -227,6 +229,10 @@ class kova_mnist_tools():
         random.shuffle(data_set)
         print("End shuffle")
         print("Saving dataset")
-        file_name = self.target_file_mask.format('')
+        file_name = self.target_file_mask.format(postfix)
         self.save_data(file_name, data_set, True)
 
+
+    def show_dataset(self, dataset):
+        x_train, y_train = self.split_dataset(dataset)
+        self.show_dataset_images(x_train, y_train, True)
